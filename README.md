@@ -34,62 +34,132 @@ buildms/
 │   │   │   └── vn/edu/fpt/swp/
 │   │   │       ├── controller/
 │   │   │       │   ├── AuthController.java
+│   │   │       │   ├── CategoryController.java
+│   │   │       │   ├── CustomerController.java
+│   │   │       │   ├── DashboardController.java
+│   │   │       │   ├── InboundController.java
+│   │   │       │   ├── InventoryController.java
+│   │   │       │   ├── LocationController.java
+│   │   │       │   ├── MovementController.java
+│   │   │       │   ├── OutboundController.java
+│   │   │       │   ├── ProductController.java
+│   │   │       │   ├── SalesOrderController.java
+│   │   │       │   ├── TransferController.java
 │   │   │       │   ├── UserController.java
-│   │   │       │   └── ProductController.java
+│   │   │       │   └── WarehouseController.java
 │   │   │       ├── dao/
+│   │   │       │   ├── CategoryDAO.java
+│   │   │       │   ├── CustomerDAO.java
+│   │   │       │   ├── InventoryDAO.java
+│   │   │       │   ├── LocationDAO.java
+│   │   │       │   ├── ProductDAO.java
+│   │   │       │   ├── RequestDAO.java
+│   │   │       │   ├── RequestItemDAO.java
+│   │   │       │   ├── SalesOrderDAO.java
+│   │   │       │   ├── SalesOrderItemDAO.java
 │   │   │       │   ├── UserDAO.java
-│   │   │       │   └── ProductDAO.java
+│   │   │       │   └── WarehouseDAO.java
 │   │   │       ├── model/
+│   │   │       │   ├── Category.java
+│   │   │       │   ├── Customer.java
+│   │   │       │   ├── Inventory.java
+│   │   │       │   ├── Location.java
+│   │   │       │   ├── Product.java
+│   │   │       │   ├── Request.java
+│   │   │       │   ├── RequestItem.java
+│   │   │       │   ├── SalesOrder.java
+│   │   │       │   ├── SalesOrderItem.java
 │   │   │       │   ├── User.java
-│   │   │       │   └── Product.java
+│   │   │       │   └── Warehouse.java
 │   │   │       ├── service/
 │   │   │       │   ├── AuthService.java
-│   │   │       │   └── ProductService.java
+│   │   │       │   ├── CategoryService.java
+│   │   │       │   ├── CustomerService.java
+│   │   │       │   ├── InboundService.java
+│   │   │       │   ├── InventoryService.java
+│   │   │       │   ├── LocationService.java
+│   │   │       │   ├── MovementService.java
+│   │   │       │   ├── OutboundService.java
+│   │   │       │   ├── ProductService.java
+│   │   │       │   ├── SalesOrderService.java
+│   │   │       │   ├── TransferService.java
+│   │   │       │   ├── UserService.java
+│   │   │       │   └── WarehouseService.java
 │   │   │       ├── filter/
 │   │   │       │   └── AuthFilter.java
-│   │   │       │   
 │   │   │       └── util/
 │   │   │           ├── DBConnection.java
 │   │   │           └── PasswordUtil.java
+│   │   │
+│   │   ├── resources/
 │   │   │
 │   │   └── webapp/
 │   │       ├── WEB-INF/
 │   │       │   ├── views/
 │   │       │   │   ├── common/
-│   │       │   │   │   ├── header.jsp
-|   |       |   |   |   ├── navbar.jsp
-│   │       │   │   │   └── footer.jsp
 │   │       │   │   ├── auth/
 │   │       │   │   │   ├── login.jsp
-│   │       │   │   │   └── register.jsp
+│   │       │   │   │   ├── register.jsp
+│   │       │   │   │   └── change-password.jsp
+│   │       │   │   ├── category/
+│   │       │   │   ├── customer/
+│   │       │   │   ├── error/
+│   │       │   │   ├── inbound/
+│   │       │   │   ├── inventory/
+│   │       │   │   ├── location/
+│   │       │   │   ├── movement/
+│   │       │   │   ├── outbound/
 │   │       │   │   ├── product/
 │   │       │   │   │   ├── list.jsp
-│   │       │   │   │   ├── create.jsp
+│   │       │   │   │   ├── add.jsp
 │   │       │   │   │   ├── edit.jsp
-│   │       │   │   │   └── view.jsp
-│   │       │   │   └── error/
-│   │       │   │       ├── 403.jsp
-│   │       │   │       ├── 404.jsp
-│   │       │   │       └── 500.jsp
-│   │       │   │
+│   │       │   │   │   └── details.jsp
+│   │       │   │   ├── sales-order/
+│   │       │   │   ├── transfer/
+│   │       │   │   ├── user/
+│   │       │   │   ├── warehouse/
+│   │       │   │   └── dashboard.jsp
 │   │       │   └── web.xml
-│   │       │
 │   │       ├── assets/
-│   │       │   ├── css/
-│   │       │   ├── js/
-│   │       │   └── images/
-│   │       │
+│   │       ├── dist/
+│   │       ├── fonts/
+│   │       ├── js/
+│   │       ├── libs/
 │   │       └── index.jsp
 │   │
 │   └── test/
 │
 ├── database/
 │   ├── schema.sql
-│   └── auth_migration.sql
+│   ├── user_seed.sql
+│   └── full_seed_data.sql
 │
 ├── document/
 │   ├── SRS.md
-│   └── AUTHENTICATION.md
+│   ├── AUTHENTICATION.md
+│   ├── AUTH_QUICK_REF.md
+│   └── detail-design/
+│       ├── UC-AUTH-*.md
+│       ├── UC-CAT-*.md
+│       ├── UC-CUS-*.md
+│       ├── UC-INB-*.md
+│       ├── UC-INV-*.md
+│       ├── UC-LOC-*.md
+│       ├── UC-MOV-*.md
+│       ├── UC-OUT-*.md
+│       ├── UC-PRD-*.md
+│       ├── UC-SO-*.md
+│       ├── UC-TRF-*.md
+│       ├── UC-USER-*.md
+│       └── UC-WH-*.md
+│
+├── template/
+│   ├── index.html
+│   ├── assets/
+│   ├── fonts/
+│   ├── html/
+│   ├── js/
+│   └── libs/
 │
 └── pom.xml
 
@@ -150,42 +220,81 @@ This project follows the **MVC (Model-View-Controller)** pattern:
 - **List Products**: View all products with search functionality
 - **Create Product**: Add new products to inventory
 - **View Product**: Display detailed product information
-### Authentication Endpoints
-| Method | URL | Description |
-|--------|-----|-------------|
-| GET | `/auth?action=login` | Show login page |
-| POST | `/auth` (action=login) | Process login |
-| GET | `/auth?action=register` | Show registration page |
-| POST | `/auth` (action=register) | Process registration |
-| GET | `/auth?action=logout` | Logout user |
+- **Update Product**: Edit product information
+- **Delete Product**: Soft delete products (marks as inactive)
 
-### User Management Endpoints (Admin Only)
-| Method | URL | Description |
-|--------|-----|-------------|
-| GET | `/user` | List all users |
-| GEUsers table
-```sql
-Id           BIGINT (PK, Auto Increment)
-Username     NVARCHAR(100) UNIQUE NOT NULL
-Name         NVARCHAR(255) NOT NULL
-Email        NVARCHAR(255) UNIQUE NOT NULL
-PasswordHash NVARCHAR(500) NOT NULL
-Role         NVARCHAR(50) NOT NULL      -- Admin/Manager/Staff/Sales
-Status       NVARCHAR(50) DEFAULT 'Active'
-WarehouseId  BIGINT NULL
-CreatedAt    DATETIME2
-LastLogin    DATETIME2
-```
+### 👤 User Management (Admin Only)
+- **User CRUD**: Create, read, update, delete users
+- **Role Assignment**: Assign roles to users
+- **Password Reset**: Admin can reset user passwords
+- **User Status**: Activate/deactivate user accounts
+- **Warehouse Assignment**: Assign users to warehouses
 
-###Setup Instructions
+### 🏭 Warehouse Management
+- **Create Warehouse**: Add new warehouse locations
+- **Update Warehouse**: Edit warehouse details
+- **View Warehouses**: List all warehouses
+
+### 📍 Location Management
+- **Create Location**: Add storage locations within warehouses
+- **Update Location**: Modify location details
+- **Toggle Status**: Activate/deactivate locations
+- **View Locations**: List all locations by warehouse
+
+### 👥 Customer Management
+- **Create Customer**: Register new customers
+- **Update Customer**: Modify customer information
+- **Toggle Status**: Activate/deactivate customers
+- **View Customers**: List all customers
+
+### 📊 Inventory Management
+- **View by Warehouse**: See inventory organized by warehouse
+- **View by Product**: See product inventory across warehouses
+- **Search Inventory**: Find products in specific locations
+
+### 📦 Category Management
+- **Create Category**: Add product categories
+- **Update Category**: Modify category information
+- **Delete Category**: Remove categories
+- **View Categories**: List all product categories
+
+### 💼 Sales Order Management
+- **Create Sales Order**: Generate new sales orders
+- **Confirm Sales Order**: Approve pending orders
+- **Generate Outbound**: Create outbound requests from sales orders
+- **Cancel Sales Order**: Cancel orders when needed
+
+### 🔄 Transfer Management
+- **Create Transfer Request**: Initialize warehouse transfers
+- **Execute Transfer Outbound**: Process outbound transfers
+- **Execute Transfer Inbound**: Complete inbound transfers
+
+### ↔️ Movement Management
+- **Create Internal Movement**: Initiate internal movements
+- **Execute Internal Movement**: Process location-to-location movements
+
+### 📥 Inbound Management
+- **Create Inbound Request**: Register incoming stock
+- **Approve Inbound Request**: Authorize inbound operations
+- **Execute Inbound Request**: Complete inbound operations
+
+### 📤 Outbound Management
+- **Approve Outbound Request**: Authorize outbound operations
+- **Execute Outbound Request**: Process outbound fulfillment
+- **Internal Outbound**: Handle internal outbound requests
+
+## Setup Instructions
 
 ### 1. Database Setup
 ```bash
 # Create database and run schema
 sqlcmd -S localhost -i database/schema.sql
 
-# Run authentication migration
-sqlcmd -S localhost -d smartwms_db -i database/auth_migration.sql
+# Run user seed data
+sqlcmd -S localhost -d smartwms_db -i database/user_seed.sql
+
+# Run full seed data
+sqlcmd -S localhost -d smartwms_db -i database/full_seed_data.sql
 ```
 
 ### 2. Configure Database Connection
@@ -212,79 +321,17 @@ Copy `target/buildms.war` to Tomcat's `webapps/` directory.
 
 ### 5. Access Application
 - URL: `http://localhost:8080/buildms/`
-- Login: Use test credentials from auth_migration.sql
+- Login: Use test credentials from user_seed.sql
 
 ## Documentation
 
 - **[SRS.md](document/SRS.md)** - Software Requirements Specification
 - **[AUTHENTICATION.md](document/AUTHENTICATION.md)** - Authentication system details
+- **[AUTH_QUICK_REF.md](document/AUTH_QUICK_REF.md)** - Authentication quick reference
+- **[Detail Design Documents](document/detail-design/)** - Detailed use case specifications
 - **[schema.sql](database/schema.sql)** - Database schema
-- **[auth_migration.sql](database/auth_migration.sql)** - Authentication migration
-
-## Future Enhancements
-
-- ✅ ~~User authentication and authorization~~ (Completed)
-- Order management
-- Warehouse operations (Inbound/Outbound/Transfer)
-- Sales order management
-- Inventory tracking
-- Image upload support
-- Advanced reporting
-- RESTful API
-- Pagination for product lists
-- Export/Import functionality
-- Email notifications
-- Two-factor authentication
-- API token authentication
-```
-
-See [schema.sql](database/schema.sql) for complete database structure.
-### 👥 User Management (Admin Only)
-- **User CRUD**: Create, read, update, delete users
-- **Role Assignment**: Assign roles to users
-- **Password Reset**: Admin can reset user passwords
-- **User Status**: Activate/deactivate user accounts
-- **Delete Product**: Soft delete products (marks as inactive)
-- **Search Products**: Find products by name, category, or description
-
-## API Endpoints
-
-| Method | URL | Description |
-|--------|-----|-------------|
-| GET | `/product` | List all products |
-| GET | `/product?action=view&id={id}` | View product details |
-| GET | `/product?action=create` | Show create form |
-| POST | `/product?action=create` | Create new product |
-| GET | `/product?action=edit&id={id}` | Show edit form |
-| POST | `/product?action=update` | Update product |
-| GET | `/product?action=delete&id={id}` | Delete product |
-| GET | `/product?action=search&keyword={keyword}` | Search products |
-
-## Database Schema
-
-### products table
-```sql
-id           BIGINT (PK, Auto Increment)
-name         VARCHAR(255) NOT NULL
-description  TEXT
-price        DECIMAL(10, 2) NOT NULL
-quantity     INT NOT NULL
-category     VARCHAR(100)
-image_url    VARCHAR(500)
-created_at   TIMESTAMP
-updated_at   TIMESTAMP
-active       BOOLEAN
-```
-
-## Future Enhancements
-
-- User authentication and authorization
-- Order management
-- Image upload support
-- Advanced reporting
-- RESTful API
-- Pagination for product lists
-- Export/Import functionality
+- **[user_seed.sql](database/user_seed.sql)** - User data
+- **[full_seed_data.sql](database/full_seed_data.sql)** - Complete test data
 
 ## License
 
