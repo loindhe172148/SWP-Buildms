@@ -50,13 +50,13 @@ public class UserController extends HttpServlet {
                 showList(request, response);
                 break;
             case "add":
-                //showAddForm(request, response);
+                showAddForm(request, response);
                 break;
             case "edit":
-                //showEditForm(request, response);
+                showEditForm(request, response);
                 break;
             case "toggle":
-                //toggleStatus(request, response);
+                toggleStatus(request, response);
                 break;
             default:
                 showList(request, response);
@@ -78,10 +78,10 @@ public class UserController extends HttpServlet {
         
         switch (action) {
             case "add":
-                //processAdd(request, response);
+                processAdd(request, response);
                 break;
             case "edit":
-                //processEdit(request, response);
+                processEdit(request, response);
                 break;
             default:
                 response.sendRedirect(request.getContextPath() + "/user?action=list");
@@ -148,6 +148,266 @@ public class UserController extends HttpServlet {
         
         request.getRequestDispatcher("/WEB-INF/views/user/list.jsp")
                .forward(request, response);
+    }
+    
+    /**
+     * UC-USER-001: Show add user form
+     */
+    private void showAddForm(HttpServletRequest request, HttpServletResponse response) 
+            throws ServletException, IOException {
+        
+        List<Warehouse> warehouses = warehouseService.getAllWarehouses();
+        request.setAttribute("warehouses", warehouses);
+        request.setAttribute("roles", userService.getValidRoles());
+        
+        request.getRequestDispatcher("/WEB-INF/views/user/add.jsp")
+               .forward(request, response);
+    }
+    
+    /**
+     * UC-USER-001: Process add user
+     */
+    private void processAdd(HttpServletRequest request, HttpServletResponse response) 
+            throws ServletException, IOException {
+        
+        String username = request.getParameter("username");
+        String name = request.getParameter("name");
+        String email = request.getParameter("email");
+        String password = request.getParameter("password");
+        String role = request.getParameter("role");
+        String warehouseIdParam = request.getParameter("warehouseId");
+        
+        Long warehouseId = null;
+        if (warehouseIdParam != null && !warehouseIdParam.isEmpty()) {
+            try {
+                warehouseId = Long.parseLong(warehouseIdParam);
+            } catch (NumberFormatException e) {
+                // Ignore
+            }
+        }
+        
+        try {
+            User user = new User();
+            user.setUsername(username);
+            user.setName(name);
+            user.setEmail(email);
+            user.setRole(role);
+            user.setWarehouseId(warehouseId);
+            
+            User created = userService.createUser(user, password);
+            
+            if (created != null) {
+                HttpSession session = request.getSession();
+                session.setAttribute("successMessage", "User created successfully!");
+                response.sendRedirect(request.getContextPath() + "/user?action=list");
+            } else {
+                request.setAttribute("errorMessage", "Failed to create user. Please try again.");
+                setFormAttributes(request, username, name, email, role, warehouseId);
+                request.getRequestDispatcher("/WEB-INF/views/user/add.jsp")
+                       .forward(request, response);
+            }
+        } catch (IllegalArgumentException e) {
+            request.setAttribute("errorMessage", e.getMessage());
+            setFormAttributes(request, username, name, email, role, warehouseId);
+            request.getRequestDispatcher("/WEB-INF/views/user/add.jsp")
+                   .forward(request, response);
+        }
+    }
+    
+    /**
+     * UC-USER-002: Show edit user form
+     */
+    private void showEditForm(HttpServletRequest request, HttpServletResponse response) 
+            throws ServletException, IOException {
+        
+        String idParam = request.getParameter("id");
+        
+        if (idParam == null || idParam.isEmpty()) {
+            HttpSession session = request.getSession();
+            session.setAttribute("errorMessage", "User ID is required");
+            response.sendRedirect(request.getContextPath() + "/user?action=list");
+            return;
+        }
+        
+        try {
+            Long id = Long.parseLong(idParam);
+            User user = userService.getUserById(id);
+            
+            if (user == null) {
+                HttpSession session = request.getSession();
+                session.setAttribute("errorMessage", "User not found");
+                response.sendRedirect(request.getContextPath() + "/user?action=list");
+                return;
+            }
+            
+            List<Warehouse> warehouses = warehouseService.getAllWarehouses();
+            User currentUser = getCurrentUser(request);
+            
+            // Get warehouse name if assigned
+            if (user.getWarehouseId() != null) {
+                for (Warehouse wh : warehouses) {
+                    if (wh.getId() == user.getWarehouseId().intValue()) {
+                        request.setAttribute("warehouseName", wh.getName());
+                        break;
+                    }
+                }
+            }
+            
+            request.setAttribute("user", user);
+            request.setAttribute("warehouses", warehouses);
+            request.setAttribute("roles", userService.getValidRoles());
+            request.setAttribute("currentUserId", currentUser != null ? currentUser.getId() : null);
+            request.setAttribute("isCurrentUser", currentUser != null && currentUser.getId().equals(id));
+            
+            request.getRequestDispatcher("/WEB-INF/views/user/edit.jsp")
+                   .forward(request, response);
+                   
+        } catch (NumberFormatException e) {
+            HttpSession session = request.getSession();
+            session.setAttribute("errorMessage", "Invalid user ID");
+            response.sendRedirect(request.getContextPath() + "/user?action=list");
+        }
+    }
+    
+    /**
+     * UC-USER-002: Process edit user
+     */
+    private void processEdit(HttpServletRequest request, HttpServletResponse response) 
+            throws ServletException, IOException {
+        
+        String idParam = request.getParameter("id");
+        String username = request.getParameter("username");
+        String name = request.getParameter("name");
+        String email = request.getParameter("email");
+        String role = request.getParameter("role");
+        String warehouseIdParam = request.getParameter("warehouseId");
+        
+        Long warehouseId = null;
+        if (warehouseIdParam != null && !warehouseIdParam.isEmpty()) {
+            try {
+                warehouseId = Long.parseLong(warehouseIdParam);
+            } catch (NumberFormatException e) {
+                // Ignore
+            }
+        }
+        
+        try {
+            Long id = Long.parseLong(idParam);
+            User currentUser = getCurrentUser(request);
+            
+            User user = userService.getUserById(id);
+            if (user == null) {
+                HttpSession session = request.getSession();
+                session.setAttribute("errorMessage", "User not found");
+                response.sendRedirect(request.getContextPath() + "/user?action=list");
+                return;
+            }
+            
+            user.setUsername(username);
+            user.setName(name);
+            user.setEmail(email);
+            user.setRole(role);
+            user.setWarehouseId(warehouseId);
+            
+            boolean updated = userService.updateUser(user, currentUser.getId());
+            
+            if (updated) {
+                HttpSession session = request.getSession();
+                session.setAttribute("successMessage", "User updated successfully!");
+                response.sendRedirect(request.getContextPath() + "/user?action=list");
+            } else {
+                request.setAttribute("errorMessage", "Failed to update user. Please try again.");
+                request.setAttribute("user", user);
+                request.setAttribute("warehouses", warehouseService.getAllWarehouses());
+                request.setAttribute("roles", userService.getValidRoles());
+                request.getRequestDispatcher("/WEB-INF/views/user/edit.jsp")
+                       .forward(request, response);
+            }
+        } catch (NumberFormatException e) {
+            HttpSession session = request.getSession();
+            session.setAttribute("errorMessage", "Invalid user ID");
+            response.sendRedirect(request.getContextPath() + "/user?action=list");
+        } catch (IllegalArgumentException e) {
+            Long id = Long.parseLong(idParam);
+            User user = userService.getUserById(id);
+            request.setAttribute("errorMessage", e.getMessage());
+            request.setAttribute("user", user);
+            request.setAttribute("username", username);
+            request.setAttribute("name", name);
+            request.setAttribute("email", email);
+            request.setAttribute("role", role);
+            request.setAttribute("warehouseId", warehouseId);
+            request.setAttribute("warehouses", warehouseService.getAllWarehouses());
+            request.setAttribute("roles", userService.getValidRoles());
+            request.getRequestDispatcher("/WEB-INF/views/user/edit.jsp")
+                   .forward(request, response);
+        }
+    }
+    
+    /**
+     * UC-USER-003: Toggle user status
+     */
+    private void toggleStatus(HttpServletRequest request, HttpServletResponse response) 
+            throws ServletException, IOException {
+        
+        String idParam = request.getParameter("id");
+        
+        if (idParam == null || idParam.isEmpty()) {
+            HttpSession session = request.getSession();
+            session.setAttribute("errorMessage", "User ID is required");
+            response.sendRedirect(request.getContextPath() + "/user?action=list");
+            return;
+        }
+        
+        try {
+            Long id = Long.parseLong(idParam);
+            User currentUser = getCurrentUser(request);
+            User targetUser = userService.getUserById(id);
+            
+            if (targetUser == null) {
+                HttpSession session = request.getSession();
+                session.setAttribute("errorMessage", "User not found");
+                response.sendRedirect(request.getContextPath() + "/user?action=list");
+                return;
+            }
+            
+            boolean isDeactivating = "Active".equals(targetUser.getStatus());
+            
+            boolean toggled = userService.toggleUserStatus(id, currentUser.getId());
+            
+            HttpSession session = request.getSession();
+            if (toggled) {
+                String message = "User " + (isDeactivating ? "deactivated" : "activated") + " successfully!";
+                session.setAttribute("successMessage", message);
+            } else {
+                session.setAttribute("errorMessage", "Failed to update user status");
+            }
+            
+            response.sendRedirect(request.getContextPath() + "/user?action=list");
+            
+        } catch (NumberFormatException e) {
+            HttpSession session = request.getSession();
+            session.setAttribute("errorMessage", "Invalid user ID");
+            response.sendRedirect(request.getContextPath() + "/user?action=list");
+        } catch (IllegalArgumentException e) {
+            HttpSession session = request.getSession();
+            session.setAttribute("errorMessage", e.getMessage());
+            response.sendRedirect(request.getContextPath() + "/user?action=list");
+        }
+    }
+    
+    /**
+     * Set form attributes for re-displaying form with values
+     */
+    private void setFormAttributes(HttpServletRequest request, String username, String name, 
+                                   String email, String role, Long warehouseId) {
+        request.setAttribute("username", username);
+        request.setAttribute("name", name);
+        request.setAttribute("email", email);
+        request.setAttribute("role", role);
+        request.setAttribute("warehouseId", warehouseId);
+        request.setAttribute("warehouses", warehouseService.getAllWarehouses());
+        request.setAttribute("roles", userService.getValidRoles());
     }
     
     /**
