@@ -193,12 +193,13 @@ public class OutboundController extends HttpServlet {
             }
         }
         
-        List<Request> requests;
-        if ((status != null && !status.trim().isEmpty()) || warehouseId != null) {
-            requests = outboundService.searchOutboundRequests(status, warehouseId);
-        } else {
-            requests = outboundService.getAllOutboundRequests();
+        String selectedStatus = status != null ? status.trim() : null;
+        if (selectedStatus != null && selectedStatus.isEmpty()) {
+            selectedStatus = null;
         }
+
+        PageRequest pageRequest = PaginationUtil.resolvePageRequest(request);
+        PageResult<Request> requestPage = outboundService.searchOutboundRequestsPaginated(selectedStatus, warehouseId, pageRequest);
         
         // Get warehouses for filter
         List<Warehouse> warehouses = outboundService.getAllWarehouses();
