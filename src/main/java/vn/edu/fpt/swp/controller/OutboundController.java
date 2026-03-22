@@ -141,7 +141,7 @@ public class OutboundController extends HttpServlet {
         User user = (User) session.getAttribute("user");
         return user != null ? user.getId() : null;
     }
-
+    
     /**
      * Get current user
      */
@@ -203,7 +203,7 @@ public class OutboundController extends HttpServlet {
         
         // Get warehouses for filter
         List<Warehouse> warehouses = outboundService.getAllWarehouses();
-        
+
         // Build lookup maps for display using pre-loaded collections (no N+1 DB calls)
         java.util.Map<Long, String> warehouseMap = new java.util.HashMap<>();
         for (Warehouse wh : warehouses) {
@@ -265,7 +265,7 @@ public class OutboundController extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/product?action=add");
             return;
         }
-
+        
         // Staff/Manager: pre-select and lock to their assigned warehouse
         if (isWarehouseScoped(request)) {
             Long assignedWarehouseId = getAssignedWarehouseId(request);
@@ -319,7 +319,7 @@ public class OutboundController extends HttpServlet {
             }
             
             Long warehouseId = Long.parseLong(warehouseIdStr.trim());
-
+            
             // Staff/Manager can only create for their assigned warehouse
             if (isWarehouseScoped(request)) {
                 Long assignedWarehouseId = getAssignedWarehouseId(request);
@@ -419,7 +419,7 @@ public class OutboundController extends HttpServlet {
                 return;
             }
             
-// Staff/Manager can only view requests for their assigned warehouse
+            // Staff/Manager can only view requests for their assigned warehouse
             if (isWarehouseScoped(request)) {
                 Long assignedWarehouseId = getAssignedWarehouseId(request);
                 if (assignedWarehouseId == null || !assignedWarehouseId.equals(outboundRequest.getSourceWarehouseId())) {
@@ -428,7 +428,7 @@ public class OutboundController extends HttpServlet {
                     return;
                 }
             }
-
+            
             // Get items
             List<RequestItem> items = outboundService.getRequestItems(requestId);
             
@@ -518,6 +518,19 @@ public class OutboundController extends HttpServlet {
         
         try {
             Long requestId = Long.parseLong(idStr.trim());
+            
+            // Staff/Manager can only approve requests for their assigned warehouse
+            if (isWarehouseScoped(request)) {
+                Request outboundRequest = outboundService.getRequestById(requestId);
+                Long assignedWarehouseId = getAssignedWarehouseId(request);
+                if (outboundRequest == null || assignedWarehouseId == null
+                        || !assignedWarehouseId.equals(outboundRequest.getSourceWarehouseId())) {
+                    request.getSession().setAttribute("errorMessage", "You don't have permission to approve this request.");
+                    response.sendRedirect(request.getContextPath() + "/outbound");
+                    return;
+                }
+            }
+            
             Long userId = getCurrentUserId(request);
             
             boolean approved = outboundService.approveRequest(requestId, userId);
@@ -564,6 +577,19 @@ public class OutboundController extends HttpServlet {
         
         try {
             Long requestId = Long.parseLong(idStr.trim());
+            
+            // Staff/Manager can only reject requests for their assigned warehouse
+            if (isWarehouseScoped(request)) {
+                Request outboundRequest = outboundService.getRequestById(requestId);
+                Long assignedWarehouseId = getAssignedWarehouseId(request);
+                if (outboundRequest == null || assignedWarehouseId == null
+                        || !assignedWarehouseId.equals(outboundRequest.getSourceWarehouseId())) {
+                    request.getSession().setAttribute("errorMessage", "You don't have permission to reject this request.");
+                    response.sendRedirect(request.getContextPath() + "/outbound");
+                    return;
+                }
+            }
+            
             Long userId = getCurrentUserId(request);
             
             boolean rejected = outboundService.rejectRequest(requestId, userId, reason.trim());
@@ -615,6 +641,16 @@ public class OutboundController extends HttpServlet {
                 request.getSession().setAttribute("errorMessage", "Only approved requests can be executed.");
                 response.sendRedirect(request.getContextPath() + "/outbound?action=details&id=" + requestId);
                 return;
+            }
+            
+            // Staff/Manager can only execute requests for their assigned warehouse
+            if (isWarehouseScoped(request)) {
+                Long assignedWarehouseId = getAssignedWarehouseId(request);
+                if (assignedWarehouseId == null || !assignedWarehouseId.equals(outboundRequest.getSourceWarehouseId())) {
+                    request.getSession().setAttribute("errorMessage", "You don't have permission to execute this request.");
+                    response.sendRedirect(request.getContextPath() + "/outbound");
+                    return;
+                }
             }
             
             // Get items
@@ -751,6 +787,39 @@ public class OutboundController extends HttpServlet {
         try {
             Long requestId = Long.parseLong(idStr.trim());
             Long userId = getCurrentUserId(request);
+
+            // BR-EXO-006: Block completion when any item has insufficient inventory
+            vn.edu.fpt.swp.model.Request outReqCheck = outboundService.getRequestById(requestId);
+            if (outReqCheck != null && outReqCheck.getSourceWarehouseId() != null) {
+                java.util.List<vn.edu.fpt.swp.model.RequestItem> itemsCheck =
+                        outboundService.getRequestItems(requestId);
+                Long whId = outReqCheck.getSourceWarehouseId();
+                for (vn.edu.fpt.swp.model.RequestItem itm : itemsCheck) {
+                    int stillNeeded = itm.getQuantity()
+                            - (itm.getPickedQuantity() != null ? itm.getPickedQuantity() : 0);
+                    if (stillNeeded > 0) {
+                        int available = outboundService.getInventoryQuantity(itm.getProductId(), whId);
+                        if (available < stillNeeded) {
+                            request.getSession().setAttribute("errorMessage",
+                                    "Cannot complete: one or more items do not have enough inventory. "
+                                    + "Resolve the shortages shown on the execute page first.");
+                            response.sendRedirect(request.getContextPath()
+                                    + "/outbound?action=execute&id=" + requestId);
+                            return;
+                        }
+                    }
+                }
+            }
+
+            // Save dispatch notes if provided
+            String dispatchNotes = request.getParameter("dispatchNotes");
+            if (dispatchNotes != null && !dispatchNotes.trim().isEmpty()) {
+                vn.edu.fpt.swp.model.Request outReq = outboundService.getRequestById(requestId);
+                if (outReq != null) {
+                    String existingNotes = outReq.getNotes() != null ? outReq.getNotes() + "\n" : "";
+                    outboundService.updateRequestNotes(requestId, existingNotes + "Dispatch: " + dispatchNotes.trim());
+                }
+            }
             
             boolean completed = outboundService.completeExecution(requestId, userId);
             
