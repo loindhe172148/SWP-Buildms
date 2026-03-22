@@ -174,16 +174,26 @@ public class ProductController extends HttpServlet {
         
         // Build category map for display
         for (Category category : categories) {
-            request.setAttribute("categoryName_" + category.getId(), category.getName());
+            categoryMap.put(category.getId(), category.getName());
         }
-        
-        // Add total inventory quantity for each product
-        for (Product product : products) {
-            int totalQty = productService.getTotalInventoryQuantity(product.getId());
-            request.setAttribute("totalQty_" + product.getId(), totalQty);
-        }
-        
-        request.setAttribute("products", products);
+        request.setAttribute("categoryMap", categoryMap);
+
+        // Fetch all inventory totals in ONE query instead of N per-product queries
+        java.util.Map<Long, Integer> inventoryTotals = productService.getAllProductTotalQuantities();
+        request.setAttribute("inventoryTotals", inventoryTotals);
+
+        Map<String, String> paginationParams = new LinkedHashMap<>();
+        paginationParams.put("keyword", selectedKeyword);
+        paginationParams.put("categoryId", selectedCategoryId != null ? String.valueOf(selectedCategoryId) : null);
+        paginationParams.put("status", selectedStatus);
+        paginationParams.put("size", String.valueOf(pageRequest.getSize()));
+
+        request.setAttribute("products", productPage.getItems());
+        request.setAttribute("currentPage", productPage.getCurrentPage());
+        request.setAttribute("totalPages", productPage.getTotalPages());
+        request.setAttribute("pageSize", productPage.getPageSize());
+        request.setAttribute("totalItems", productPage.getTotalItems());
+        request.setAttribute("paginationBaseUrl", PaginationUtil.buildBaseUrl(request, "/product", paginationParams));
         request.getRequestDispatcher("/WEB-INF/views/product/list.jsp").forward(request, response);
     }
     
