@@ -132,37 +132,41 @@ public class ProductController extends HttpServlet {
         String categoryIdStr = request.getParameter("categoryId");
         String status = request.getParameter("status");
         
-        List<Product> products;
-        
-        // Apply filters
-        if (keyword != null && !keyword.trim().isEmpty()) {
-            // Search by keyword (SKU or name)
-            products = productService.searchProducts(keyword.trim());
-            request.setAttribute("keyword", keyword.trim());
+        String selectedKeyword = keyword != null ? keyword.trim() : null;
+        String selectedStatus = null;
+        Long selectedCategoryId = null;
+        Boolean statusFilter = null;
+
+        if (selectedKeyword != null && !selectedKeyword.isEmpty()) {
+            request.setAttribute("keyword", selectedKeyword);
+            selectedCategoryId = null;
+            statusFilter = null;
         } else if (categoryIdStr != null && !categoryIdStr.trim().isEmpty()) {
-            // Filter by category
             try {
-                Long categoryId = Long.parseLong(categoryIdStr.trim());
-                products = productService.getProductsByCategory(categoryId);
-                request.setAttribute("categoryId", categoryId);
+                selectedCategoryId = Long.parseLong(categoryIdStr.trim());
+                request.setAttribute("categoryId", selectedCategoryId);
+                selectedKeyword = null;
             } catch (NumberFormatException e) {
-                products = productService.getAllProducts();
+                selectedCategoryId = null;
             }
         } else if (status != null && !status.trim().isEmpty()) {
-            // Filter by status
             if ("active".equalsIgnoreCase(status)) {
-                products = productService.getProductsByStatus(true);
-                request.setAttribute("status", "active");
+                selectedStatus = "active";
+                statusFilter = true;
             } else if ("inactive".equalsIgnoreCase(status)) {
-                products = productService.getProductsByStatus(false);
-                request.setAttribute("status", "inactive");
-            } else {
-                products = productService.getAllProducts();
+                selectedStatus = "inactive";
+                statusFilter = false;
             }
-        } else {
-            // Get all products
-            products = productService.getAllProducts();
+            request.setAttribute("status", selectedStatus);
         }
+
+        PageRequest pageRequest = PaginationUtil.resolvePageRequest(request);
+        PageResult<Product> productPage = productService.searchProductsPaginated(
+            selectedKeyword,
+            selectedCategoryId,
+            statusFilter,
+            pageRequest
+        );
         
         // Get all categories for filter dropdown
         List<Category> categories = categoryService.getAllCategories();
