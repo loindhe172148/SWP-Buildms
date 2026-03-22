@@ -11,9 +11,14 @@ import vn.edu.fpt.swp.model.Product;
 import vn.edu.fpt.swp.model.User;
 import vn.edu.fpt.swp.service.CategoryService;
 import vn.edu.fpt.swp.service.ProductService;
+import vn.edu.fpt.swp.util.PageRequest;
+import vn.edu.fpt.swp.util.PageResult;
+import vn.edu.fpt.swp.util.PaginationUtil;
 
 import java.io.IOException;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Controller for Product Management
