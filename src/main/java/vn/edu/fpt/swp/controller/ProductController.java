@@ -415,7 +415,9 @@ public class ProductController extends HttpServlet {
                     request.setAttribute("product", product);
                 }
                 request.setAttribute("categories", categoryService.getAllCategories());
-                request.setAttribute("hasInventory", productService.getTotalInventoryQuantity(id) > 0);
+                int invQty = productService.getTotalInventoryQuantity(id);
+                request.setAttribute("hasInventory", invQty > 0);
+                request.setAttribute("inventoryQty", invQty);
                 request.getRequestDispatcher("/WEB-INF/views/product/edit.jsp").forward(request, response);
                 return;
             }
