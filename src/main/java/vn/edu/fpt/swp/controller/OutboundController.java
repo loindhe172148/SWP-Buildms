@@ -141,6 +141,36 @@ public class OutboundController extends HttpServlet {
         User user = (User) session.getAttribute("user");
         return user != null ? user.getId() : null;
     }
+
+    /**
+     * Get current user
+     */
+    private User getCurrentUser(HttpServletRequest request) {
+        HttpSession session = request.getSession(false);
+        if (session == null) return null;
+        return (User) session.getAttribute("user");
+    }
+    
+    /**
+     * Check if user is warehouse-scoped (Staff or Manager — restricted to assigned warehouse)
+     */
+    private boolean isWarehouseScoped(HttpServletRequest request) {
+        User user = getCurrentUser(request);
+        if (user == null) return false;
+        String role = user.getRole();
+        return "Staff".equals(role) || "Manager".equals(role);
+    }
+    
+    /**
+     * Get the user's assigned warehouse ID (for Staff and Manager)
+     */
+    private Long getAssignedWarehouseId(HttpServletRequest request) {
+        User user = getCurrentUser(request);
+        if (user != null && ("Staff".equals(user.getRole()) || "Manager".equals(user.getRole()))) {
+            return user.getWarehouseId();
+        }
+        return null;
+    }
     
     /**
      * List all outbound requests
