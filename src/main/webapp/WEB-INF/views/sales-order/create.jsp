@@ -21,7 +21,7 @@
             <!-- Sidebar -->
             <jsp:include page="/WEB-INF/common/sidebar.jsp">
                 <jsp:param name="activeMenu" value="sales-orders" />
-                <jsp:param name="activeSubMenu" value="sales-order-create" />
+                <jsp:param name="activeSubMenu" value="order-create" />
             </jsp:include>
             
             <!-- Layout container -->
@@ -51,14 +51,6 @@
                         <!-- Alerts -->
                         <jsp:include page="/WEB-INF/common/alerts.jsp" />
                         
-                        <c:if test="${not empty errorMessage}">
-                            <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                                <i class="bx bx-error-circle me-2"></i>
-                                ${errorMessage}
-                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                            </div>
-                        </c:if>
-                        
                         <!-- Page Header -->
                         <div class="d-flex justify-content-between align-items-center mb-4">
                             <h4 class="mb-0">
@@ -71,7 +63,7 @@
                                 <div class="alert alert-warning">
                                     <i class="bx bx-info-circle me-2"></i>
                                     No customers available. 
-                                    <a href="${contextPath}/customer?action=create">Create a customer first</a>.
+                                    <a href="${contextPath}/customer?action=add">Create a customer first</a>.
                                 </div>
                             </c:when>
                             <c:otherwise>
@@ -90,7 +82,7 @@
                                                     <select id="customerId" name="customerId" class="form-select" required>
                                                         <option value="">Select Customer</option>
                                                         <c:forEach var="customer" items="${customers}">
-                                                            <option value="${customer.id}">${customer.name} (${customer.code})</option>
+                                                            <option value="<c:out value='${customer.id}'/>"><c:out value="${customer.name}"/> (<c:out value="${customer.code}"/>)</option>
                                                         </c:forEach>
                                                     </select>
                                                 </div>
